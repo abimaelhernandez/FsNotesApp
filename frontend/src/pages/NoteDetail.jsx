@@ -1,59 +1,68 @@
-import { useEffect, useState } from "react"
-import { Link, useParams, useNavigate } from "react-router"
-import { ArrowLeftIcon, Trash2Icon } from "lucide-react"
-import api from "../lib/axios"
-import toast from "react-hot-toast"
+import { useEffect } from "react";
+import { useState } from "react";
+import { Link, useNavigate, useParams } from "react-router";
+import api from "../lib/axios";
+import toast from "react-hot-toast";
+import { ArrowLeftIcon, LoaderIcon, Trash2Icon } from "lucide-react";
 
-const NoteDetail = () => {
-  const [note, setNote] = useState({})
-  const [loading, setLoading] = useState(false)
-  const [saving, setSaving] = useState(false)
+const NoteDetailPage = () => {
+  const [note, setNote] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
-  const { id } = useParams()
-  const navigate = useNavigate()
- 
-  const handleSbumit = (e) => {
-    e.prevenDefault()
-    setSaving(true)
-    console.log('jere is change', title, content)
-  }
+  const navigate = useNavigate();
 
-  const fetchNote = async (id) => {
+  const { id } = useParams();
+
+  useEffect(() => {
+    const fetchNote = async () => {
+      try {
+        const res = await api.get(`/notes/${id}`);
+        setNote(res.data);
+      } catch (error) {
+        console.log("Error in fetching note", error);
+        toast.error("Failed to fetch the note");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchNote();
+  }, [id]);
+
+  const handleDelete = async () => {
+    if (!window.confirm("Are you sure you want to delete this note?")) return;
+
     try {
-      const res = await api.get(`/notes/${id}`)
-      console.log('success getting single note', res.data)
-      setNote(res.data.note)
-      toast.success(' Note is here')
+      await api.delete(`/notes/${id}`);
+      toast.success("Note deleted");
+      navigate("/");
     } catch (error) {
-      console.error('eror fetching note', error)
-      toast.error('current Note doez not exist')
-    }finally {
-      setLoading(false)
+      console.log("Error deleting the note:", error);
+      toast.error("Failed to delete note");
     }
-  }
+  };
 
-  const deleteNote = async (e, id) => {
-    e.preventDefault()
-    if (!window.confirm("Are you sure you want to delete this note?")) return
-    console.log('delete note clicked', note._id)
+  const handleSave = async () => {
+    if (!note.title.trim() || !note.content.trim()) {
+      toast.error("Please add a title or content");
+      return;
+    }
+
+    setSaving(true);
+
     try {
-      await api.delete(`/notes/${note._id}`)
-      toast.success('That note has been deleted')
-      navigate('/')
+      await api.put(`/notes/${id}`, note);
+      toast.success("Note updated successfully");
+      navigate("/");
     } catch (error) {
-      console.error('Error in hadle delte', error)
-      toast.error('Error deleting the note')
+      console.log("Error saving the note:", error);
+      toast.error("Failed to update note");
+    } finally {
+      setSaving(false);
     }
-  }
- 
+  };
 
-  useEffect(()=>{
-    if(id) {
-      console.log('mounted here is ID NOTE deatial', id)
-      fetchNote(id)
-    }
-  }, [])
-  
   if (loading) {
     return (
       <div className="min-h-screen bg-base-200 flex items-center justify-center">
@@ -71,7 +80,7 @@ const NoteDetail = () => {
               <ArrowLeftIcon className="h-5 w-5" />
               Back to Notes
             </Link>
-            <button onClick={deleteNote} className="btn btn-error btn-outline">
+            <button onClick={handleDelete} className="btn btn-error btn-outline">
               <Trash2Icon className="h-5 w-5" />
               Delete Note
             </button>
@@ -105,7 +114,7 @@ const NoteDetail = () => {
               </div>
 
               <div className="card-actions justify-end">
-                <button className="btn btn-primary" disabled={saving} onClick={handleSbumit}>
+                <button className="btn btn-primary" disabled={saving} onClick={handleSave}>
                   {saving ? "Saving..." : "Save Changes"}
                 </button>
               </div>
@@ -115,6 +124,5 @@ const NoteDetail = () => {
       </div>
     </div>
   );
-}
-
-export default NoteDetail
+};
+export default NoteDetailPage;

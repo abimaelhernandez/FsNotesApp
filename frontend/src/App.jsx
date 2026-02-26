@@ -1,0 +1,19 @@
+import { Routes, Route } from 'react-router'
+import Home from './pages/Home'
+import NoteDetail from './pages/NoteDetail'
+import CreatePage from './pages/Create'
+
+const App = () => {
+  return (
+    <div className="realtive">
+      <div className="absolute inset-0 -z-10 h-full w-full items-center px-5 py-24 [background:radial-gradient(125%_125%_at_50%_10%,#000_60%,#00FF9D40_100%)]" />
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/create" element={<CreatePage />} />
+        <Route path="/note/:id" element={<NoteDetail />} />
+      </Routes>
+    </div>
+  )
+}
+
+export default App

@@ -20,7 +20,7 @@ const Home = () => {
       setNotes(res.data)
       setIsRateLimited(false)
     } catch (error) {
-      console.log('error while obtaining notes', error)
+      console.log('error while obtaining change in home notes', error)
       if(error.response.status === 429) {
         setIsRateLimited(true)
       } else {

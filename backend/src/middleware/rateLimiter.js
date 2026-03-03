@@ -1,7 +1,6 @@
 import rateLimit from "../config/upstash.js"
 
 const rateLimiter = async (req, res, next) => {
-  console.log('Hittin middleware rate limiter')
   // next()
  try {
   const { success } = await rateLimit.limit("my-limit-key")
